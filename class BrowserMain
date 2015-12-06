@@ -1,0 +1,13 @@
+package projet;
+
+import java.io.IOException;
+
+public class BrowserMain {
+	
+	public static void main(String[] args){
+		
+		new BrowserInterface();
+		
+	}
+
+}
