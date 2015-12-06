@@ -1,0 +1,155 @@
+package projet;
+
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.util.*;
+
+
+public class LookupServiceClient extends DefaultHandler {
+  public LookupServiceClient(String qClass, String qString) throws Exception {
+    this.query = qString;   
+    //System.out.println("\n query: " + query);
+    HttpClient client = new HttpClient();
+    nbrResult = 1;
+    qString = query.replaceAll(" ", "+"); // URLEncoder.encode(query, "utf-8");
+    //System.out.println("\n query2: " + query2);
+    HttpMethod method =
+      new GetMethod("http://lookup.dbpedia.org/api/search.asmx/KeywordSearch?QueryClass="+qClass+"&&QueryString="+qString+"&MaxHits=3");
+    try {
+      //System.out.println("\n method: " + method.getURI());
+      client.executeMethod(method);
+      System.out.println(method);
+      System.out.println("\n\n");
+      InputStream ins = method.getResponseBodyAsStream();
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      SAXParser sax = factory.newSAXParser();
+      sax.parse(ins, this);
+    } catch (HttpException he) {
+      System.err.println("Http error connecting to lookup.dbpedia.org");
+    } catch (IOException ioe) {
+      System.err.println("Unable to connect to lookup.dbpedia.org");
+    }
+    method.releaseConnection();
+    
+  }
+
+  private List<Map<String, String>> variableBindings = new ArrayList<Map<String, String>>();
+  private Map<String, String> tempBinding = null;
+  private String lastElementName = null;
+  private static String result1;
+  private static String result2;
+  private static String result3;
+  private static int nbrResult = 1;
+  private boolean resultFound = false;
+  
+  public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+	//System.out.println(">>> StartElement");
+    //System.out.println("tempBinding " + tempBinding);
+    if (qName.equalsIgnoreCase("result")) {
+      tempBinding = new HashMap<String, String>();
+    }
+    lastElementName = qName;
+  }
+
+  public void endElement(String uri, String localName, String qName) throws SAXException {
+		//System.out.println(">>> EndElement");
+    //System.out.println("endElement " + qName);
+    if (qName.equalsIgnoreCase("result")) {
+      if (!variableBindings.contains(tempBinding) && containsSearchTerms(tempBinding))
+        variableBindings.add(tempBinding);
+    }
+  }
+  public void characters(char[] ch, int start, int length) throws SAXException {
+	    String result = new String(ch, start, length).trim();
+	
+	    //System.out.println(">>> Characters");
+	    if ("Label".equals(lastElementName))
+	    		if(result.contains(query)){
+	    			System.out.println("" + result);
+	    			if(nbrResult == 1){
+	    				result1 = result;
+	    				System.out.println("characters (r1): "+result1+"");
+	    			}
+	    			if(nbrResult == 2){
+	    				result2 = result;
+	    				System.out.println("characters (r2): "+result2+"");
+	    			}
+	    			if(nbrResult == 3){
+	    				result3 = result;
+	    				System.out.println("characters (r3): "+result3+"");
+	    			}
+	    			nbrResult++;
+	    		}
+	    
+	    if (result.length() > 0) {
+	      if ("Description".equals(lastElementName)) {
+	        if (tempBinding.get("Description") == null) {
+	          tempBinding.put("Description", result);
+	        }
+	        tempBinding.put("Description", "" + tempBinding.get("Description") + " " + result);
+	      }
+	      //if ("URI".equals(lastElementName)) tempBinding.put("URI", s);
+	      if ("URI".equals(lastElementName) && result.indexOf("Category")==-1 && tempBinding.get("URI") == null) {
+	        tempBinding.put("URI", result);
+	      }
+	      if ("Label".equals(lastElementName)) tempBinding.put("Label", result);
+	    }
+	  }
+
+public int getNbrResult(){
+	nbrResult--;
+	System.out.println("getNbrRes(r1): "+nbrResult+"");
+	return nbrResult;
+}
+  
+public String getResult1(){
+	System.out.println("getRes(r1): "+result1+"");
+	return result1;
+}
+
+public String getResult2(){	
+	System.out.println("getRes(r2): "+result2+"");
+	return result2;
+}		
+		
+public String getResult3(){	
+	System.out.println("getRes(r3): "+result3+"");
+	return result3;
+}
+	
+  public List<Map<String, String>> variableBindings() {
+	//System.out.println(">>> List");
+    return variableBindings;
+  }
+  
+  private boolean containsSearchTerms(Map<String, String> bindings) {
+	//System.out.println(">>> containsSearchTerms");
+    StringBuilder sb = new StringBuilder();
+    for (String value : bindings.values()) sb.append(value);  // do not need white space
+    String text = sb.toString().toLowerCase();
+    StringTokenizer st = new StringTokenizer(this.query);
+    while (st.hasMoreTokens()) {
+      if (text.indexOf(st.nextToken().toLowerCase()) == -1) {
+        return false;
+      }
+    }
+    return true;
+  }
+  private String query = "";
+}
+
+
+
+
+
