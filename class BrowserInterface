@@ -1,0 +1,278 @@
+package projet;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class BrowserInterface extends JFrame{
+	
+	private static String result1, result2, result3;
+	
+	JPanel rightPan, rightTopPan, rightBotPan;
+	JPanel rightBotMidVPan, rightBotMidHPan;
+	JPanel leftPan, leftTopPan, leftBotPan;
+	JPanel defaultPanel;
+	
+	int WinMaxWidth = 800, WinMaxHeight = 520;
+	int RPMaxWidth = 650, RPMaxHeight = 520;
+	int LPMaxWidth = 150, LPMaxHeight = 520;
+	int RTPMaxWidth = 650, RTPMaxHeight = 35;
+	int RBPMaxWidth = 650, RBPMaxHeight = 485;
+	int LTPMaxWidth = 150, LTPMaxHeight = 35;
+	int LBPMaxWidth = 150, LBPMaxHeight = 485;
+	
+	JMenuBar menuBar;
+	JMenu menu1, menu2;
+	JMenuItem slot1, slot2, slot3;
+	JMenuItem quit;
+	JMenuItem apropos;
+	
+	JTextField searchField;
+	JButton searchButton;
+	
+	JLabel history;
+	JScrollPane historyScrollPane;
+	JButton test;
+	
+	ButtonGroup selectClass = new ButtonGroup();
+	JRadioButton place = new JRadioButton("Place");
+	JRadioButton person = new JRadioButton("Person");
+	JRadioButton work = new JRadioButton("Work");
+	JRadioButton species = new JRadioButton("Species");
+	JRadioButton organisation = new JRadioButton("Organisation");
+	
+	JButton b1, b2, b3;
+
+	Color mainBackGroundColor = new Color(35,69,135);
+	Color Button1Color = new Color(110,160,217);
+	Color Button2Color = new Color(145,188,226);
+	Color northPanBarColor = new Color(35,69,135);
+	Color rightMainBackGroundColor = new Color(150,174,228);
+	
+	private class actList implements ActionListener{
+		
+		public void actionPerformed(ActionEvent e) {
+			if(e.getSource()==quit)
+				System.exit(0);
+			
+			else if(e.getSource()==searchButton)	
+				runLookupRequest(searchField.getText());
+			
+			else if(e.getSource() == b1)
+				runDataRequest(b1.getText());
+			
+			else if(e.getSource() == b2 && b2.getText() != ("Aucun résultat"))
+				runDataRequest(b2.getText());
+			
+			else if(e.getSource() == b3)
+				runDataRequest(b3.getText());
+			
+			else if(e.getSource() == test)
+				runDataRequest(test.getText());	
+		}
+		}
+	
+	private void runLookupRequest(String qString) {
+		
+		LookupServiceClient client;
+		 
+		try {
+			client = new LookupServiceClient("Place",""+qString+"");
+			
+			int nbrResult = client.getNbrResult();
+			b1.setVisible(false);
+			b2.setVisible(false);
+			b3.setVisible(false);	
+			
+			if(nbrResult == 0){
+				b2.setText("Aucun résultat");
+				b2.setVisible(true);
+			}
+			else if(nbrResult >= 1){
+				result1 = client.getResult1();
+				b1.setText(result1);
+				b1.setVisible(true);
+						
+				if(nbrResult >= 2){
+					result2 = client.getResult2();
+					b2.setText(result2);
+					b2.setVisible(true);
+							
+					if(nbrResult >= 3){
+						result3 = client.getResult3();
+						b3.setText(result3);
+						b3.setVisible(true);
+					}
+				}
+			 }
+			
+			
+		} catch (Exception e1) {e1.printStackTrace();}	
+	}
+	
+	private void runDataRequest(String qString){
+		
+		try {
+			DataServiceClient client = new DataServiceClient(qString);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+	}
+	
+	private void addLeftPan() {
+		
+		this.getContentPane().add(leftPan = new JPanel());
+		leftPan.setBackground(mainBackGroundColor);
+		leftPan.setPreferredSize (new Dimension(LPMaxWidth, LPMaxHeight));
+		
+		leftPan.add(leftTopPan = new JPanel(), BorderLayout.NORTH);
+			leftTopPan.setPreferredSize (new Dimension(LTPMaxWidth, LTPMaxHeight));
+			leftTopPan.setBackground(mainBackGroundColor);
+			
+		leftPan.add(leftBotPan = new JPanel(), BorderLayout.SOUTH);
+			leftBotPan.setBackground(mainBackGroundColor);
+			leftBotPan.setPreferredSize (new Dimension(LBPMaxWidth, LBPMaxHeight));
+			leftBotPan.setLayout(new GridLayout(10,1));
+			leftBotPan.add(history = new JLabel(" History : "));
+				history.setBackground(northPanBarColor);
+				history.setOpaque(true);
+			leftBotPan.add(test = new JButton("Blois"));
+				test.setBackground(Button1Color);
+				test.setBorderPainted(false);
+			leftBotPan.add(test = new JButton("Paris"));
+				test.setBackground(Button2Color);
+				test.setBorderPainted(false);
+			leftBotPan.add(test = new JButton("Blois"));
+				test.setBackground(Button1Color);
+				test.setBorderPainted(false);
+			leftBotPan.add(test = new JButton("Blos"));
+				test.setBackground(Button2Color);
+				test.setBorderPainted(false);
+			leftBotPan.add(test = new JButton(""));
+				test.setBackground(Button1Color);
+				test.setBorderPainted(false);
+			leftBotPan.add(test = new JButton(""));
+				test.setBackground(Button2Color);
+				test.setBorderPainted(false);
+			leftBotPan.add(test = new JButton(""));
+				test.setBackground(Button1Color);
+				test.setBorderPainted(false);
+			leftBotPan.add(test = new JButton("Blois"));
+				test.setBackground(Button2Color);
+				test.setBorderPainted(false);
+			leftBotPan.add(defaultPanel= new JPanel());
+				defaultPanel.setBackground(mainBackGroundColor);
+	}
+	
+	private void addRightPan() {
+		
+		this.getContentPane().add(rightPan = new JPanel());
+		rightPan.setBackground(northPanBarColor);
+		rightPan.setPreferredSize (new Dimension(RPMaxWidth, RPMaxHeight));
+		
+		rightPan.add(rightTopPan = new JPanel(), BorderLayout.NORTH);
+			rightTopPan.setPreferredSize (new Dimension(RTPMaxWidth, RTPMaxHeight));
+			rightTopPan.setBackground(northPanBarColor);
+			rightTopPan.setLayout(new FlowLayout());
+			rightTopPan.add(searchField = new JTextField("Rechercher..."));
+			rightTopPan.add(searchButton = new JButton("Go !"));
+			selectClass.add(place);
+				place.setBackground(northPanBarColor);
+			selectClass.add(person);
+				person.setBackground(northPanBarColor);
+			selectClass.add(work);
+				work.setBackground(northPanBarColor);
+			selectClass.add(species);
+				species.setBackground(northPanBarColor);
+			selectClass.add(organisation);
+				organisation.setBackground(northPanBarColor);
+			rightTopPan.add(place);
+			rightTopPan.add(person);
+			rightTopPan.add(work);
+			rightTopPan.add(species);
+			rightTopPan.add(organisation);
+			
+		rightPan.add(rightBotPan = new JPanel());
+			rightBotPan.setPreferredSize (new Dimension(RBPMaxWidth, RBPMaxHeight));
+			rightBotPan.setLayout(new GridLayout(1,3));
+			rightBotPan.add(defaultPanel = new JPanel());
+				defaultPanel.setBackground(rightMainBackGroundColor);
+			rightBotPan.add(rightBotMidVPan = new JPanel());
+				rightBotMidVPan.setLayout(new GridLayout(3,1));
+				rightBotMidVPan.add(defaultPanel = new JPanel());
+					defaultPanel.setBackground(rightMainBackGroundColor);
+				rightBotMidVPan.add(rightBotMidHPan = new JPanel());
+					rightBotMidHPan.setLayout(new GridLayout(3,1));
+					rightBotMidHPan.add(b1 = new JButton("Aucun résultat"));
+					rightBotMidHPan.add(b2 = new JButton("Aucun résultat"));
+					rightBotMidHPan.add(b3 = new JButton("Aucun résultat"));
+						b1.setBackground(Button1Color); b1.setVisible(false); b1.setBorderPainted(false);
+						b2.setBackground(Button2Color); b2.setVisible(false); b2.setBorderPainted(false);
+						b3.setBackground(Button1Color); b3.setVisible(false); b3.setBorderPainted(false);
+				rightBotMidVPan.add(defaultPanel = new JPanel());
+					defaultPanel.setBackground(rightMainBackGroundColor);
+			rightBotPan.add(defaultPanel = new JPanel());
+				defaultPanel.setBackground(rightMainBackGroundColor);
+			
+				rightBotMidVPan.setBackground(rightMainBackGroundColor);
+				rightBotMidHPan.setBackground(rightMainBackGroundColor);
+				rightBotPan.setBackground(rightMainBackGroundColor);
+	}
+	
+	private void addMenuBar(){
+		
+		menuBar = new JMenuBar() ;
+		menu1 = new JMenu("Fichier");
+		menu2 = new JMenu("?");
+		menu1.add(slot1 = new JMenuItem("slot1"));
+		menu1.add(slot2 = new JMenuItem("slot2"));
+		menu1.add(slot3 = new JMenuItem("slot3"));
+		menu1.add(new JSeparator());
+		menu1.add(quit = new JMenuItem("Quitter"));
+		menu2.add(apropos = new JMenuItem("A propos"));
+		menuBar.add(menu1);
+		menuBar.add(menu2);
+		this.setJMenuBar(menuBar);
+	}
+	
+	private void addActionListener() {
+		
+		quit.addActionListener(new actList());
+		
+		searchButton.addActionListener(new actList());
+		
+		b1.addActionListener(new actList());
+		b2.addActionListener(new actList());
+		b3.addActionListener(new actList());
+		test.addActionListener(new actList());
+	}
+	
+	/* public BrowserInterface(HistoryManager HM) {
+		
+		super("TEST");
+		
+		this.HM = HM;
+		
+		WindowListener mainWindow = new WindowAdapter() {
+			public void windowClosing(WindowEvent e){
+				System.exit(0);
+		}
+		};
+		
+		addWindowListener(mainWindow);
+		setSize(WinMaxWidth,WinMaxHeight);
+		setResizable(false);
+		setVisible(true);
+		this.getContentPane().setLayout(new FlowLayout());
+		this.getContentPane().setBackground(mainBackGroundColor);
+		
+		addLeftPan();
+		addRightPan();
+		
+		addMenuBar();
+		addActionListener();
+		
+		pack();
+	} */
+
+}
